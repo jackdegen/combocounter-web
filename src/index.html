@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CSV Processor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .upload-container {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            display: none;
+        }
+        .error {
+            color: red;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>CSV File Processor</h1>
+    <div class="upload-container">
+        <form id="upload-form">
+            <input type="file" id="file-input" accept=".csv">
+            <button type="submit">Process File</button>
+        </form>
+    </div>
+    <div id="error" class="error"></div>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('upload-form').onsubmit = async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            const fileInput = document.getElementById('file-input');
+            const errorDiv = document.getElementById('error');
+            const resultDiv = document.getElementById('result');
+            
+            formData.append('file', fileInput.files[0]);
+            
+            try {
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    errorDiv.style.display = 'none';
+                    resultDiv.style.display = 'block';
+                    resultDiv.innerHTML = '<h2>Results:</h2><pre>' + 
+                        JSON.stringify(JSON.parse(data.result), null, 2) + '</pre>';
+                } else {
+                    errorDiv.style.display = 'block';
+                    errorDiv.textContent = data.error;
+                    resultDiv.style.display = 'none';
+                }
+            } catch (error) {
+                errorDiv.style.display = 'block';
+                errorDiv.textContent = 'An error occurred while processing the file.';
+                resultDiv.style.display = 'none';
+            }
+        };
+    </script>
+</body>
+</html>
