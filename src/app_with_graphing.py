@@ -28,6 +28,43 @@ def adjust_key(key: str|tuple[str,...]) -> str:
     """
     return key if isinstance(key, str) else '-'.join(key)
 
+def graph_exposures(counts_dict: dict[str,int], N: int):
+    """
+    Graph exposures given counts of each player/combos of players
+    """
+    exposure_data = {
+        'name': list(counts_dict.keys()),
+        'exposure (%)': [100 * count_ / N for count_ in counts_dict.values()]
+    }
+
+    df = pd.DataFrame(exposure_data).set_index('name').sort_values('exposure (%)', ascending=True)
+
+    print("Starting plot creation...")
+    print(f"DataFrame shape: {df.shape}")
+    
+    plt.clf()
+    plt.close('all')
+
+    fig = plt.figure(figsize=(90, 60))
+    print(f"Figure size in inches: {fig.get_size_inches()}")
+    
+    ax = fig.add_subplot(111)
+
+    # Create plot
+   #plt.figure(figsize=(20,12))
+    df.plot.barh(ax=ax)
+   #plt.title('Exposures:')
+    plt.tight_layout()
+
+    # Save plot to temporary buffer
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png', dpi=300, bbox_inches='tight')
+    plt.close(fig)# Free the memory
+    buf.seek(0)
+
+    return buf
+    
+
 def run_ComboCounter(
     df: pd.DataFrame,
     option: int, # Option for combination length --> TODO: Decide/standardize naming for this option (<-- example of issue)
@@ -70,8 +107,7 @@ def run_ComboCounter(
     #return graph_exposures(counts[combo_len], df.shape[0])
 
 
-    # return dict([item for item in counts[option].items()][:{1: 100}.get(option, 50)])
-    return dict([item for item in counts[option].items()][:num_results])
+    return dict([item for item in counts[option].items()][:{1: 100}.get(option, 50)])
     # return lineups[0]
     # return cc.counts()
     # return df.to_dict(orient='records')
@@ -92,7 +128,6 @@ def process_file():
         option = int(request.form.get('option', '1'))
         sport = str(request.form.get('sport', 'PGA'))
         mode = str(request.form.get('mode', 'classic')).lower()
-        num_results = int(request.form.get('numResults', '50'))
         
         
         
@@ -113,7 +148,7 @@ def process_file():
         # )
     
         # Process the DataFrame using your algorithm
-        result = run_ComboCounter(df, option, sport, mode, num_results)
+        result = run_ComboCounter(df, option, sport, mode)
         
         # Return the results directly since they're already in a JSON-serializable format
         return jsonify({

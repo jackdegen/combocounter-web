@@ -5,25 +5,90 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
+
         .upload-container {
             border: 2px dashed #ccc;
             padding: 20px;
             text-align: center;
-            margin: 20px 0;
+            margin: 20px;
         }
+
         #result {
             margin-top: 20px;
             padding: 10px;
             border: 1px solid #ccc;
             display: none;
+            overflow-x: auto;
         }
+
+        .radio-group {
+            margin: 15px 0;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .radio-group label {
+            margin: 0 15px;
+            cursor: pointer;
+        }
+
+        .radio-group-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
         .error {
             color: red;
             display: none;
+            margin: 10px 0;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        /* Styling for the dropdown */
+        select {
+            padding: 8px 12px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: white;
+            cursor: pointer;
+            margin: 10px 0;
+            width: 200px;
+        }
+
+        select:hover {
+            border-color: #888;
+        }
+
+        /* Style for the submit button */
+        button[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        /* File input styling */
+        input[type="file"] {
+            padding: 10px;
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -32,36 +97,95 @@
     <div class="upload-container">
         <form id="upload-form">
             <input type="file" id="file-input" accept=".csv">
+
+            <div class="radio-group">
+                <span class="radio-group-label">Analysis Option:</span>
+                <label>
+                    <input type="radio" name="option" value="1" checked> 1
+                </label>
+                <label>
+                    <input type="radio" name="option" value="2"> 2
+                </label>
+                <label>
+                    <input type="radio" name="option" value="3"> 3
+                </label>
+            </div>
+
+            <div class="radio-group">
+                <span class="radio-group-label">Sport:</span>
+                <label>
+                    <input type="radio" name="sport" value="PGA" checked> PGA
+                </label>
+                <label>
+                    <input type="radio" name="sport" value="NFL"> NFL
+                </label>
+                <label>
+                    <input type="radio" name="sport" value="NBA"> NBA
+                </label>
+            </div>
+
+            <div class="radio-group">
+                <span class="radio-group-label">Game Type:</span>
+                <label>
+                    <input type="radio" name="gametype" value="Classic" checked> Classic
+                </label>
+                <label>
+                    <input type="radio" name="gametype" value="Showdown"> Showdown
+                </label>
+            </div>
+
+            <div class="radio-group">
+                <span class="radio-group-label">Number of Results:</span>
+                <select name="numResults" id="numResults">
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="150">150</option>
+                    <option value="200">200</option>
+                    <option value="250">250</option>
+                </select>
+            </div>
+
             <button type="submit">Process File</button>
         </form>
     </div>
     <div id="error" class="error"></div>
-    <div id="result"></div>
+    <div id="result">
+        <h2>Results:</h2>
+        <pre id="json-result"></pre>
+    </div>
 
     <script>
         document.getElementById('upload-form').onsubmit = async function(e) {
             e.preventDefault();
-            
+
             const formData = new FormData();
             const fileInput = document.getElementById('file-input');
             const errorDiv = document.getElementById('error');
             const resultDiv = document.getElementById('result');
-            
+            const selectedOption = document.querySelector('input[name="option"]:checked').value;
+            const selectedSport = document.querySelector('input[name="sport"]:checked').value;
+            const selectedGameType = document.querySelector('input[name="gametype"]:checked').value;
+            const selectedNumResults = document.getElementById('numResults').value;
+
             formData.append('file', fileInput.files[0]);
-            
+            formData.append('option', selectedOption);
+            formData.append('sport', selectedSport);
+            formData.append('gametype', selectedGameType);
+            formData.append('numResults', selectedNumResults);
+
             try {
                 const response = await fetch('/process', {
                     method: 'POST',
                     body: formData
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (response.ok) {
+                    document.getElementById('json-result').textContent =
+                        JSON.stringify(data.result, null, 2);
                     errorDiv.style.display = 'none';
                     resultDiv.style.display = 'block';
-                    resultDiv.innerHTML = '<h2>Results:</h2><pre>' + 
-                        JSON.stringify(JSON.parse(data.result), null, 2) + '</pre>';
                 } else {
                     errorDiv.style.display = 'block';
                     errorDiv.textContent = data.error;
