@@ -1,3 +1,9 @@
+# Don't add data
+# Can all be generated elsewhere without this repo
+# Valuable to others + takes up space = no point
+src/data/
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
