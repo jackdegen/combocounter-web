@@ -10,7 +10,7 @@ PLAYER_COLUMNS = {
     },
 
     'PGA': {
-        'classic': [f'G{n+1}' for n in range(5)],
-        'showdown': [f'G{n+1}' for n in range(5)],
+        'classic': [f'G{n+1}' for n in range(6)],
+        'showdown': [f'G{n+1}' for n in range(6)],
     }
 }

@@ -1,0 +1,184 @@
+/* Upload section styling */
+.upload-section {
+    text-align: center;
+    padding: 2rem;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.file-drop-area {
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    padding: 2rem;
+    margin: 1rem 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.file-drop-area:hover {
+    border-color: var(--primary-color);
+    background-color: rgba(52, 152, 219, 0.05);
+}
+
+/* Button styling */
+.option-button {
+    display: inline-block;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background-color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.option-button:hover {
+    border-color: var(--primary-color);
+}
+
+.option-button.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.option-button input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.text-input {
+    padding: 8px 12px;
+    font-size: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    width: 200px;
+    transition: all 0.3s ease;
+}
+
+.text-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+}
+
+/* Table styling */
+#ownership-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+#ownership-table th,
+#ownership-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+#ownership-table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+#ownership-table tr:hover {
+    background-color: #f5f5f5;
+}
+
+.percentage-cell {
+    text-align: right;
+}
+
+/* Leverage styling */
+.positive-leverage {
+    color: #27ae60;
+    font-weight: bold;
+}
+
+.negative-leverage {
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+/* Advanced options styles */
+.advanced-options {
+    display: none;
+    margin-top: 30px;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.option-button-container {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.option-button-large {
+    padding: 12px 20px;
+    border-radius: 6px;
+    background-color: white;
+    border: 1px solid var(--border-color);
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.option-button-large:hover {
+    border-color: var(--primary-color);
+    background-color: rgba(52, 152, 219, 0.05);
+}
+
+.option-button-large i {
+    color: var(--primary-color);
+}
+
+/* Chart container */
+.chart-container {
+    margin-top: 20px;
+}
+
+.chart-bar {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+/* Dark mode adjustments */
+body.dark-mode .upload-section,
+body.dark-mode .advanced-options,
+body.dark-mode #ownership-table,
+body.dark-mode .option-button,
+body.dark-mode .option-button-large {
+    background-color: var(--dark-card);
+    color: var(--dark-text);
+}
+
+body.dark-mode .file-drop-area {
+    border-color: var(--dark-border);
+}
+
+body.dark-mode #ownership-table th {
+    background-color: #2c3e50;
+}
+
+body.dark-mode #ownership-table td {
+    border-color: var(--dark-border);
+}
+
+body.dark-mode .option-button:not(.active),
+body.dark-mode .option-button-large {
+    border-color: var(--dark-border);
+}

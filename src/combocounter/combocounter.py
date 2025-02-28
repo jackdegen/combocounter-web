@@ -4,13 +4,13 @@ class ComboCounterDict:
     def __init__(self, *, k: int):
         self.__k = k
         self.__data = {k: dict() for k in range(1,k+1)}
-        
+
     @staticmethod
-    def level(key: str|tuple[str,...]):
+    def level(key):
         return 1 if isinstance(key, str) or len(key) == 1 else len(key)
-    
+
     @staticmethod
-    def parse_key(key: str|tuple[str,...]):
+    def parse_key(key):
 
         # If single person key, just return it
         if isinstance(key, str):
@@ -19,49 +19,51 @@ class ComboCounterDict:
         # Otherwise its a tuple
         # Quick linting in case tuple with len == 1
         return key[0] if len(key) == 1 else tuple(sorted(key))
-    
-    def __setitem__(self, key: str|tuple[str,...], value: int) -> None:
+
+    def __setitem__(self, key, value: int) -> None:
         self.__data[self.level(key)][self.parse_key(key)] = value
         return
-        
-    def __getitem__(self, key: str|tuple[str,...]) -> int:
+
+    def __getitem__(self, key) -> int:
         return self.__data[self.level(key)][self.parse_key(key)]
-    
-    def get(self, key: str|tuple[str,...], default=0):
+
+    def get(self, key, default=0):
         return self.__data[self.level(key)].get(self.parse_key(key), default)
-    
+
     def data(self):
         return self.__data
-    
+
 class ComboCounter:
-    
+
     def __init__(self, names2d: tuple[tuple[str,...],...], *, k:int):
+
+        # Quick linting needed?
         self.names2d = names2d
         self.__k = k
         self.cc_dict = ComboCounterDict(k=k)
 
-    def __setitem__(self, key: str|tuple[str,...], value: int) -> None:
+    def __setitem__(self, key, value: int) -> None:
         self.cc_dict[key] = value
         return
-        
-    def __getitem__(self, key: str|tuple[str,...]) -> int:
+
+    def __getitem__(self, key) -> int:
         return self.cc_dict[key]
 
-    def get(self, key: str|tuple[str,...], default=0):
+    def get(self, key, default=0):
         return self.cc_dict.get(key, default)
-        
+
     def run(self):
         # Sometimes not going to run, instead will use iteratively
         for names in self.names2d:
-            
+
             for name in names:
                 self.cc_dict[name] = self.cc_dict.get(name, 0) + 1
-                
+
             for k in range(2, self.__k+1):
-                
+
                 for combo in [tuple(combo_) for combo_ in itertools.combinations(names, k)]:
                     self.cc_dict[combo] = self.cc_dict.get(combo, 0) + 1
-                
+
     def counts(self, percents=False):
 
 
@@ -79,7 +81,7 @@ class ComboCounter:
             }
 
             n_lineups = len(self.names2d)
-            
+
             self.sorted_percents = {
                 level: {
                     combo: round(100*count/n_lineups, 2)
@@ -89,7 +91,7 @@ class ComboCounter:
             }
 
             return self.sorted_percents
-        
+
         if hasattr(self, 'sorted'):
             return self.sorted
 
@@ -103,7 +105,7 @@ class ComboCounter:
             ))
             for level, innerdict in self.cc_dict.data().items()
         }
-        
+
         return self.sorted
 
     def player_exposure_at_level(self, name: str, level: int):
@@ -124,5 +126,5 @@ class ComboCounter:
             }
 
         exposures = {k: v for k,v in exposures.items() if v > kwargs.get('cutoff', max(exposures.values()) / 2)}
-        
+
         return exposures
