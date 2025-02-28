@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DFS Analysis - Field</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .upload-section {
+            text-align: center;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .file-drop-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 1rem 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-drop-area:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+
+        .option-button {
+            display: inline-block;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background-color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .option-button:hover {
+            border-color: var(--primary-color);
+        }
+
+        .option-button.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .option-button input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .text-input {
+            padding: 8px 12px;
+            font-size: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            width: 200px;
+            transition: all 0.3s ease;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+        }
+
+        #ownership-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        #ownership-table th,
+        #ownership-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        #ownership-table th {
+            background-color: #f4f4f4;
+            font-weight: bold;
+        }
+
+        #ownership-table tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .percentage-cell {
+            text-align: right;
+        }
+
+        .positive-leverage {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .negative-leverage {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        /* Advanced options styles */
+        .advanced-options {
+            display: none;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .option-button-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .option-button-large {
+            padding: 12px 20px;
+            border-radius: 6px;
+            background-color: white;
+            border: 1px solid var(--border-color);
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .option-button-large:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+
+        .option-button-large i {
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+                <h1>DFS Analysis</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('home') }}">Tool</a></li>
+                    <li><a href="{{ url_for('field') }}" class="active">Field</a></li>
+                    <li><a href="{{ url_for('about') }}">About</a></li>
+                    <li><a href="{{ url_for('contact') }}">Contact</a></li>
+                </ul>
+            </nav>
+            <div class="theme-toggle">
+                <i class="fas fa-moon"></i>
+            </div>
+        </div>
+    </header>
+
+    <div class="construction-banner">
+        <div class="banner-content">
+            <i class="fas fa-hard-hat"></i>
+            <p>This tool is still under active development. Some features may be incomplete or change without notice.</p>
+        </div>
+    </div>
+
+    <main>
+        <div class="card">
+            <h2>Field Analysis</h2>
+            <div class="upload-section">
+                <form id="field-form">
+                    <div class="file-drop-area">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Drag & drop your CSV file here or click to browse</p>
+                        <input type="file" id="file-input" accept=".csv" style="display: none;">
+                    </div>
+
+                    <div style="margin: 30px 0;">
+                        <div class="radio-group" style="margin-bottom: 30px;">
+                            <span class="radio-group-label">Sport:</span>
+                            <label class="option-button active">
+                                <input type="radio" name="sport" value="PGA" checked>
+                                <span>PGA</span>
+                            </label>
+                            <!--
+                            <label class="option-button">
+                                <input type="radio" name="sport" value="NFL">
+                                <span>NFL</span>
+                            </label>
+                            -->
+                            <label class="option-button">
+                                <input type="radio" name="sport" value="NBA">
+                                <span>NBA</span>
+                            </label>
+                        </div>
+
+                        <div class="radio-group" style="margin-bottom: 30px;">
+                            <span class="radio-group-label">Game Type:</span>
+                            <label class="option-button active">
+                                <input type="radio" name="mode" value="Classic" checked>
+                                <span>Classic</span>
+                            </label>
+                            <label class="option-button">
+                                <input type="radio" name="mode" value="Showdown">
+                                <span>Showdown</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="primary-button" style="margin-top: 20px;">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>View Field</span>
+                    </button>
+                </form>
+            </div>
+
+            <div id="error" class="error-message" style="display: none;"></div>
+
+            <!-- Advanced options section that appears after processing -->
+            <div id="advanced-options" class="advanced-options">
+                <h3>Advanced Analysis Options</h3>
+
+                <div id="contestant-input-div" class="radio-group" style="margin-bottom: 30px;">
+                    <span class="radio-group-label">Contestant:</span>
+                    <input type="text" name="contestant" id="contestant-input" class="text-input" placeholder="Enter contestant">
+                </div>
+
+                <div id="player-input-div" class="radio-group" style="margin-bottom: 30px;">
+                    <span class="radio-group-label">Player (separate multiple players with a comma):</span>
+                    <input type="text" name="player" id="player-input" class="text-input" placeholder="Enter player">
+                </div>
+
+                <div class="option-button-container">
+                    <button id="duplicates-button" class="option-button-large">
+                        <i class="fas fa-clone"></i>
+                        <span>Find Duplicates</span>
+                    </button>
+
+                    <button id="max-entries-button" class="option-button-large">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Max Entries</span>
+                    </button>
+
+                    <button id="mme-ownership-button" class="option-button-large">
+                        <i class="fas fa-percentage"></i>
+                        <span>MME Ownership</span>
+                    </button>
+
+                    <button id="leverage-button" class="option-button-large">
+                        <i class="fas fa-balance-scale"></i>
+                        <span>Determine Leverage</span>
+                    </button>
+
+                    <button id="export-button" class="option-button-large">
+                        <i class="fas fa-file-export"></i>
+                        <span>Export Ownership</span>
+                    </button>
+
+                    <button id="visualize-button" class="option-button-large">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>Visualize Data</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="ownership-results" style="display: none;">
+                <h3>Player Ownership</h3>
+                <div id="table-container">
+                    <table id="ownership-table">
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th>Ownership %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="leverage-results" style="display: none;">
+                <h3>Leverage Analysis</h3>
+                <div id="leverage-container"></div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 DFS Analysis Tool. Created by deegs.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Theme toggle functionality
+        document.querySelector('.theme-toggle').addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            const icon = this.querySelector('i');
+            icon.className = document.body.classList.contains('dark-mode') ? 'fas fa-sun' : 'fas fa-moon';
+        });
+
+        const form = document.getElementById('field-form');
+        const fileInput = document.getElementById('file-input');
+        const dropArea = document.querySelector('.file-drop-area');
+        const errorDiv = document.getElementById('error');
+        const ownershipResults = document.getElementById('ownership-results');
+        const advancedOptions = document.getElementById('advanced-options');
+
+        function initializeOptionButtons() {
+            document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                if (radio.checked) {
+                    radio.closest('.option-button').classList.add('active');
+                }
+
+                radio.addEventListener('change', function() {
+                    const name = this.name;
+                    document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+                        r.closest('.option-button').classList.remove('active');
+                    });
+                    this.closest('.option-button').classList.add('active');
+                });
+            });
+        }
+
+        // File drop functionality
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            dropArea.style.borderColor = 'var(--primary-color)';
+            dropArea.style.backgroundColor = 'rgba(52, 152, 219, 0.05)';
+        }
+
+        function unhighlight() {
+            dropArea.style.borderColor = '';
+            dropArea.style.backgroundColor = '';
+        }
+
+        dropArea.addEventListener('click', () => fileInput.click());
+
+        dropArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            fileInput.files = files;
+        }
+
+        function displayOwnership(ownershipData) {
+            const tbody = document.querySelector('#ownership-table tbody');
+            tbody.innerHTML = '';
+
+            // Sort by ownership percentage descending
+            const sortedOwnership = Object.entries(ownershipData)
+                .sort(([,a], [,b]) => b - a);
+
+            sortedOwnership.forEach(([player, ownership]) => {
+                const row = document.createElement('tr');
+
+                const playerCell = document.createElement('td');
+                playerCell.textContent = player;
+
+                const ownershipCell = document.createElement('td');
+                ownershipCell.className = 'percentage-cell';
+                ownershipCell.textContent = `${ownership.toFixed(1)}%`;
+
+                row.appendChild(playerCell);
+                row.appendChild(ownershipCell);
+                tbody.appendChild(row);
+            });
+        }
+
+        // Form submission to process field
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData();
+            // Only require a file on the first submission
+            const hasCachedFile = sessionStorage.getItem('hasProcessedFile') === 'true';
+
+            if (!fileInput.files[0] && !hasCachedFile) {
+                errorDiv.textContent = 'Please select a file';
+                errorDiv.style.display = 'block';
+                ownershipResults.style.display = 'none';
+                advancedOptions.style.display = 'none';
+                return;
+            }
+
+            if (fileInput.files[0]) {
+                formData.append('file', fileInput.files[0]);
+                // Reset the cached file flag when uploading a new file
+                sessionStorage.removeItem('hasProcessedFile');
+            }
+
+            formData.append('sport', document.querySelector('input[name="sport"]:checked').value);
+            formData.append('mode', document.querySelector('input[name="mode"]:checked').value.toLowerCase());
+
+            try {
+                const submitButton = form.querySelector('button');
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Processing...</span>';
+
+                const response = await fetch('/analyze-field', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Mark that we have processed a file (for the session)
+                    sessionStorage.setItem('hasProcessedFile', 'true');
+
+                    displayOwnership(data.analysis);
+                    errorDiv.style.display = 'none';
+                    ownershipResults.style.display = 'block';
+
+                    // Show advanced options
+                    advancedOptions.style.display = 'block';
+
+                    // Scroll to results
+                    ownershipResults.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    errorDiv.textContent = data.error;
+                    errorDiv.style.display = 'block';
+                    ownershipResults.style.display = 'none';
+                    advancedOptions.style.display = 'none';
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                errorDiv.textContent = 'An error occurred while analyzing the file';
+                errorDiv.style.display = 'block';
+                ownershipResults.style.display = 'none';
+                advancedOptions.style.display = 'none';
+            } finally {
+                const submitButton = form.querySelector('button');
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<i class="fas fa-chart-bar"></i><span>Process Field</span>';
+            }
+        });
+
+        // Max Entries button handler
+        document.getElementById('max-entries-button').addEventListener('click', async function() {
+            try {
+                // Hide ownership results
+                document.getElementById('ownership-results').style.display = 'none';
+
+                // Hide text bars
+                document.getElementById('contestant-input-div').style.display = 'none';
+                document.getElementById('player-input-div').style.display = 'none';
+
+                // Display loading
+                this.disabled = true;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Processing...</span>';
+
+                const formData = new FormData();
+                // Only include the file if we don't have a cached version
+                const hasCachedFile = sessionStorage.getItem('hasProcessedFile') === 'true';
+                if (!hasCachedFile && fileInput.files[0]) {
+                    formData.append('file', fileInput.files[0]);
+                }
+
+                formData.append('sport', document.querySelector('input[name="sport"]:checked').value);
+                formData.append('mode', document.querySelector('input[name="mode"]:checked').value.toLowerCase());
+
+                // Call the max entries endpoint
+                const response = await fetch('/analyze-max-entries', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    const leverageContainer = document.getElementById('leverage-container');
+
+                    // Create max entries table
+                    let maxEntriesHTML = `
+                        <div class="results-table-wrapper">
+                            <table class="results-table">
+                                <thead>
+                                    <tr>
+                                        <th>Contestant</th>
+                                        <th>Number of Entries</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+
+                    // Populate with data
+                    for (const item of data.entries) {
+                        maxEntriesHTML += `
+                            <tr>
+                                <td>${item.contestant}</td>
+                                <td class="count-cell">${item.entries}</td>
+                            </tr>
+                        `;
+                    }
+
+                    maxEntriesHTML += `
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+
+                    leverageContainer.innerHTML = maxEntriesHTML;
+                    document.getElementById('leverage-results').style.display = 'block';
+                    document.getElementById('leverage-results').scrollIntoView({ behavior: 'smooth' });
+                    errorDiv.style.display = 'none';
+                } else {
+                    console.error("API Error:", data.error);
+                    errorDiv.textContent = data.error;
+                    errorDiv.style.display = 'block';
+                    document.getElementById('leverage-results').style.display = 'none';
+                }
+
+            } catch (error) {
+                console.error("Error:", error);
+                errorDiv.textContent = 'Error analyzing max entries';
+                errorDiv.style.display = 'block';
+            } finally {
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-chart-line"></i><span>Max Entries</span>';
+            }
+        });
+
+        // MME Ownership button handler
+        document.getElementById('mme-ownership-button').addEventListener('click', async function() {
+            try {
+                // Hide ownership results
+                document.getElementById('ownership-results').style.display = 'none';
+
+                // Hide text bars
+                document.getElementById('contestant-input-div').style.display = 'none';
+                document.getElementById('player-input-div').style.display = 'block';
+
+                // Display loading
+                this.disabled = true;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Processing...</span>';
+
+                const player = document.getElementById('player-input').value.trim();
+
+                const formData = new FormData();
+                // Only include the file if we don't have a cached version
+                const hasCachedFile = sessionStorage.getItem('hasProcessedFile') === 'true';
+                if (!hasCachedFile && fileInput.files[0]) {
+                    formData.append('file', fileInput.files[0]);
+                }
+
+                formData.append('sport', document.querySelector('input[name="sport"]:checked').value);
+                formData.append('mode', document.querySelector('input[name="mode"]:checked').value.toLowerCase());
+                formData.append('player', player)
+
+                // Call the MME ownership endpoint
+                const response = await fetch('/analyze-mme-ownership', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    const leverageContainer = document.getElementById('leverage-container');
+
+                    // Create MME ownership table
+                    let mmeOwnershipHTML = `
+                        <div class="results-table-wrapper">
+                            <table class="results-table">
+                                <thead>
+                                    <tr>
+                                        <th>Player</th>
+                                        <th>MME Ownership %</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+
+                    // Convert to array, sort by ownership percentage descending
+                    const sortedOwnership = Object.entries(data.mme_ownership)
+                        .sort(([, a], [, b]) => b - a);
+
+                    // Populate with data
+                    for (const [player, ownership] of sortedOwnership) {
+                        mmeOwnershipHTML += `
+                            <tr>
+                                <td>${player}</td>
+                                <td class="percentage-cell">${ownership.toFixed(1)}%</td>
+                            </tr>
+                        `;
+                    }
+
+                    mmeOwnershipHTML += `
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+
+                    leverageContainer.innerHTML = mmeOwnershipHTML;
+                    document.getElementById('leverage-results').style.display = 'block';
+                    document.getElementById('leverage-results').scrollIntoView({ behavior: 'smooth' });
+                    errorDiv.style.display = 'none';
+                } else {
+                    errorDiv.textContent = data.error;
+                    errorDiv.style.display = 'block';
+                    document.getElementById('leverage-results').style.display = 'none';
+                }
+
+            } catch (error) {
+                console.error("Error:", error);
+                errorDiv.textContent = 'Error analyzing MME ownership';
+                errorDiv.style.display = 'block';
+            } finally {
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-percentage"></i><span>MME Ownership</span>';
+            }
+        });
+
+        // Duplicates button handler
+        document.getElementById('duplicates-button').addEventListener('click', async function() {
+            try {
+                // Hide ownership results
+                document.getElementById('ownership-results').style.display = 'none';
+
+                // Hide text bars
+                document.getElementById('contestant-input-div').style.display = 'none';
+                document.getElementById('player-input-div').style.display = 'none';
+
+                // Display loading
+                this.disabled = true;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Processing...</span>';
+
+                const formData = new FormData();
+                // Only include the file if we don't have a cached version
+                const hasCachedFile = sessionStorage.getItem('hasProcessedFile') === 'true';
+                if (!hasCachedFile && fileInput.files[0]) {
+                    formData.append('file', fileInput.files[0]);
+                }
+
+                formData.append('sport', document.querySelector('input[name="sport"]:checked').value);
+                formData.append('mode', document.querySelector('input[name="mode"]:checked').value.toLowerCase());
+
+                // Call the duplicates endpoint
+                const response = await fetch('/analyze-duplicates', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    const leverageContainer = document.getElementById('leverage-container');
+
+                    // Create duplicates table
+                    let duplicatesHTML = `
+                        <div class="results-table-wrapper">
+                            <table class="results-table">
+                                <thead>
+                                    <tr>
+                                        <th>Lineup</th>
+                                        <th>Count</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+
+                    // Populate with data - account for the lineup being a string instead of an array
+                    for (const item of data.duplicates) {
+                        duplicatesHTML += `
+                            <tr>
+                                <td>${item.lineup.replace(/-/g, ', ')}</td>
+                                <td class="count-cell">${item.entries}</td>
+                            </tr>
+                        `;
+                    }
+
+                    duplicatesHTML += `
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+
+                    leverageContainer.innerHTML = duplicatesHTML;
+                    document.getElementById('leverage-results').style.display = 'block';
+                    document.getElementById('leverage-results').scrollIntoView({ behavior: 'smooth' });
+                    errorDiv.style.display = 'none';
+                } else {
+                    console.error("API Error:", data.error);
+                    errorDiv.textContent = data.error;
+                    errorDiv.style.display = 'block';
+                    document.getElementById('leverage-results').style.display = 'none';
+                }
+
+            } catch (error) {
+                console.error("Error:", error);
+                errorDiv.textContent = 'Error analyzing duplicates';
+                errorDiv.style.display = 'block';
+            } finally {
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-clone"></i><span>Find Duplicates</span>';
+            }
+        });
+
+        // Leverage button handler
+        document.getElementById('leverage-button').addEventListener('click', async function() {
+
+            // Hide text bars
+            document.getElementById('contestant-input-div').style.display = 'block';
+            document.getElementById('player-input-div').style.display = 'block';
+
+            const contestant = document.getElementById('contestant-input').value.trim();
+            const player = document.getElementById('player-input').value.trim()
+
+            if (!contestant) {
+                errorDiv.textContent = 'Please enter a contestant name';
+                errorDiv.style.display = 'block';
+                document.getElementById('leverage-results').style.display = 'none';
+                return;
+            }
+
+            try {
+                // Hide ownership results
+                document.getElementById('ownership-results').style.display = 'none';
+
+                // Display loading
+                this.disabled = true;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Calculating...</span>';
+
+                const formData = new FormData();
+                // Only include the file if we don't have a cached version
+                const hasCachedFile = sessionStorage.getItem('hasProcessedFile') === 'true';
+                if (!hasCachedFile && fileInput.files[0]) {
+                    formData.append('file', fileInput.files[0]);
+                }
+
+                formData.append('sport', document.querySelector('input[name="sport"]:checked').value);
+                formData.append('mode', document.querySelector('input[name="mode"]:checked').value.toLowerCase());
+                formData.append('contestant', contestant);
+                formData.append('player', player);
+
+                // Call your leverage analysis endpoint
+                const response = await fetch('/analyze-leverage', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    const leverageContainer = document.getElementById('leverage-container');
+
+                    // Create leverage table
+                    let leverageHTML = `
+                        <div class="results-table-wrapper">
+                            <table class="results-table">
+                                <thead>
+                                    <tr>
+                                        <th>Player</th>
+                                        <th>Leverage</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+
+                    // Populate with data using new array format
+                    for (const item of data.leverage) {
+                        // Determine if leverage is positive or negative for styling
+                        const leverageClass = item.leverage > 0 ? 'positive-leverage' : (item.leverage < 0 ? 'negative-leverage' : '');
+
+                        leverageHTML += `
+                            <tr>
+                                <td>${item.player}</td>
+                                <td class="percentage-cell ${leverageClass}">${item.leverage.toFixed(1)}%</td>
+                            </tr>
+                        `;
+                    }
+
+                    leverageHTML += `
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+
+                    leverageContainer.innerHTML = leverageHTML;
+                    document.getElementById('leverage-results').style.display = 'block';
+                    document.getElementById('leverage-results').scrollIntoView({ behavior: 'smooth' });
+                    errorDiv.style.display = 'none';
+                } else {
+                    console.error("API Error:", data.error);
+                    errorDiv.textContent = data.error;
+                    errorDiv.style.display = 'block';
+                    document.getElementById('leverage-results').style.display = 'none';
+                }
+
+            } catch (error) {
+                console.error("Error:", error);
+                errorDiv.textContent = 'Error calculating leverage';
+                errorDiv.style.display = 'block';
+            } finally {
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-balance-scale"></i><span>Determine Leverage</span>';
+            }
+        });
+
+        document.getElementById('export-button').addEventListener('click', async function() {
+            try {
+
+                // Hide text bars
+                document.getElementById('contestant-input-div').style.display = 'none';
+                document.getElementById('player-input-div').style.display = 'none';
+
+                // Display loading
+                this.disabled = true;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Exporting...</span>';
+
+                const formData = new FormData();
+                // Only include the file if we don't have a cached version
+                const hasCachedFile = sessionStorage.getItem('hasProcessedFile') === 'true';
+                if (!hasCachedFile && fileInput.files[0]) {
+                    formData.append('file', fileInput.files[0]);
+                }
+
+                formData.append('sport', document.querySelector('input[name="sport"]:checked').value);
+                formData.append('mode', document.querySelector('input[name="mode"]:checked').value.toLowerCase());
+
+                // Client-side export using table data already available
+                const table = document.getElementById('ownership-table');
+                if (table) {
+                    let csv = [];
+                    csv.push(['Player', 'Ownership %']);
+
+                    const rows = table.querySelectorAll('tbody tr');
+                    rows.forEach(row => {
+                        const cells = row.querySelectorAll('td');
+                        csv.push([cells[0].textContent, cells[1].textContent]);
+                    });
+
+                    const csvContent = 'data:text/csv;charset=utf-8,' +
+                        csv.map(row => row.join(',')).join('\n');
+
+                    const encodedUri = encodeURI(csvContent);
+                    const link = document.createElement('a');
+                    link.setAttribute('href', encodedUri);
+                    link.setAttribute('download', 'ownership_data.csv');
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+
+            } catch (error) {
+                console.error("Error:", error);
+                errorDiv.textContent = 'Error exporting data';
+                errorDiv.style.display = 'block';
+            } finally {
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-file-export"></i><span>Export Ownership</span>';
+            }
+        });
+
+        document.getElementById('visualize-button').addEventListener('click', async function() {
+            try {
+                // Display loading
+                this.disabled = true;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Visualizing...</span>';
+
+                const formData = new FormData();
+                // Only include the file if we don't have a cached version
+                const hasCachedFile = sessionStorage.getItem('hasProcessedFile') === 'true';
+                if (!hasCachedFile && fileInput.files[0]) {
+                    formData.append('file', fileInput.files[0]);
+                }
+
+                formData.append('sport', document.querySelector('input[name="sport"]:checked').value);
+                formData.append('mode', document.querySelector('input[name="mode"]:checked').value.toLowerCase());
+
+                // Call visualization endpoint
+                const response = await fetch('/visualize-data', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Create a visualization container if it doesn't exist
+                    let visualContainer = document.getElementById('visualization-container');
+                    if (!visualContainer) {
+                        visualContainer = document.createElement('div');
+                        visualContainer.id = 'visualization-container';
+                        document.getElementById('ownership-results').appendChild(visualContainer);
+                    }
+
+                    // For demo purposes - create a simple bar chart using HTML/CSS
+                    let visualHTML = `
+                        <h3>Ownership Visualization</h3>
+                        <div class="chart-container" style="margin-top: 20px;">
+                    `;
+
+                    // Get top 15 players by ownership
+                    const topPlayers = Object.entries(data.visualization)
+                        .sort(([,a], [,b]) => b - a)
+                        .slice(0, 15);
+
+                    // Add bars for each player
+                    topPlayers.forEach(([player, ownership]) => {
+                        const widthPercent = Math.min(100, ownership * 2); // Scale for better visibility
+                        visualHTML += `
+                            <div class="chart-bar" style="margin-bottom: 10px; display: flex; align-items: center;">
+                                <div style="width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${player}</div>
+                                <div style="flex-grow: 1;">
+                                    <div style="background-color: var(--primary-color); height: 20px; width: ${widthPercent}%; border-radius: 3px;"></div>
+                                </div>
+                                <div style="width: 50px; text-align: right;">${ownership.toFixed(1)}%</div>
+                            </div>
+                        `;
+                    });
+
+                    visualHTML += `</div>`;
+                    visualContainer.innerHTML = visualHTML;
+
+                    // Scroll to the visualization
+                    visualContainer.scrollIntoView({ behavior: 'smooth' });
+                    errorDiv.style.display = 'none';
+                } else {
+                    console.error("API Error:", data.error);
+                    errorDiv.textContent = data.error;
+                    errorDiv.style.display = 'block';
+                }
+
+            } catch (error) {
+                console.error("Error:", error);
+                errorDiv.textContent = 'Error visualizing data';
+                errorDiv.style.display = 'block';
+            } finally {
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-chart-pie"></i><span>Visualize Data</span>';
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeOptionButtons();
+        });
+    </script>
+</body>
+</html>

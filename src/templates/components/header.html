@@ -1,0 +1,19 @@
+<header>
+    <div class="header-container">
+        <div class="logo">
+            <i class="fas fa-chart-line"></i>
+            <h1>DFS Analysis</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('home') }}" {% if request.path == url_for('home') %}class="active"{% endif %}>Tool</a></li>
+                <li><a href="{{ url_for('field') }}" {% if request.path == url_for('field') %}class="active"{% endif %}>Field</a></li>
+                <li><a href="{{ url_for('about') }}" {% if request.path == url_for('about') %}class="active"{% endif %}>About</a></li>
+                <li><a href="{{ url_for('contact') }}" {% if request.path == url_for('contact') %}class="active"{% endif %}>Contact</a></li>
+            </ul>
+        </nav>
+        <div class="theme-toggle">
+            <i class="fas fa-moon"></i>
+        </div>
+    </div>
+</header>

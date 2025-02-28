@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DFS Analysis - Field</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='field.css') }}">
+</head>
+<body>
+    {% include 'components/header.html' %}
+
+    <div class="construction-banner">
+        <div class="banner-content">
+            <i class="fas fa-hard-hat"></i>
+            <p>This tool is still under active development. Some features may be incomplete or change without notice.</p>
+        </div>
+    </div>
+
+    <main>
+        <div class="card">
+            <h2>Field Analysis</h2>
+            <div class="upload-section">
+                <form id="field-form">
+                    <div class="file-drop-area">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Drag & drop your CSV file here or click to browse</p>
+                        <input type="file" id="file-input" accept=".csv" style="display: none;">
+                    </div>
+
+                    <div style="margin: 30px 0;">
+                        <div class="radio-group" style="margin-bottom: 30px;">
+                            <span class="radio-group-label">Sport:</span>
+                            <label class="option-button active">
+                                <input type="radio" name="sport" value="PGA" checked>
+                                <span>PGA</span>
+                            </label>
+                            <label class="option-button">
+                                <input type="radio" name="sport" value="NBA">
+                                <span>NBA</span>
+                            </label>
+                        </div>
+
+                        <div class="radio-group" style="margin-bottom: 30px;">
+                            <span class="radio-group-label">Game Type:</span>
+                            <label class="option-button active">
+                                <input type="radio" name="mode" value="Classic" checked>
+                                <span>Classic</span>
+                            </label>
+                            <label class="option-button">
+                                <input type="radio" name="mode" value="Showdown">
+                                <span>Showdown</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="primary-button" style="margin-top: 20px;">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>View Field</span>
+                    </button>
+                </form>
+            </div>
+
+            <div id="error" class="error-message" style="display: none;"></div>
+
+            <!-- Advanced options section that appears after processing -->
+            <div id="advanced-options" class="advanced-options">
+                <h3>Advanced Analysis Options</h3>
+
+                <div id="contestant-input-div" class="radio-group" style="margin-bottom: 30px;">
+                    <span class="radio-group-label">Contestant:</span>
+                    <input type="text" name="contestant" id="contestant-input" class="text-input" placeholder="Enter contestant">
+                </div>
+
+                <div id="player-input-div" class="radio-group" style="margin-bottom: 30px;">
+                    <span class="radio-group-label">Player (separate multiple players with a comma):</span>
+                    <input type="text" name="player" id="player-input" class="text-input" placeholder="Enter player">
+                </div>
+
+                <div class="option-button-container">
+                    <button id="duplicates-button" class="option-button-large">
+                        <i class="fas fa-clone"></i>
+                        <span>Find Duplicates</span>
+                    </button>
+
+                    <button id="max-entries-button" class="option-button-large">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Max Entries</span>
+                    </button>
+
+                    <button id="mme-ownership-button" class="option-button-large">
+                        <i class="fas fa-percentage"></i>
+                        <span>MME Ownership</span>
+                    </button>
+
+                    <button id="leverage-button" class="option-button-large">
+                        <i class="fas fa-balance-scale"></i>
+                        <span>Determine Leverage</span>
+                    </button>
+
+                    <button id="export-button" class="option-button-large">
+                        <i class="fas fa-file-export"></i>
+                        <span>Export Ownership</span>
+                    </button>
+
+                    <button id="visualize-button" class="option-button-large">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>Visualize Data</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="ownership-results" style="display: none;">
+                <h3>Player Ownership</h3>
+                <div id="table-container">
+                    <table id="ownership-table">
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th>Ownership %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="leverage-results" style="display: none;">
+                <h3>Leverage Analysis</h3>
+                <div id="leverage-container"></div>
+            </div>
+        </div>
+    </main>
+
+    {% include 'components/footer.html' %}
+
+    <script src="{{ url_for('static', filename='field.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='field.js') }}"></script>
+</body>
+</html>

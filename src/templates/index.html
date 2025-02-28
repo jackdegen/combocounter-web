@@ -1,202 +1,275 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>CSV Processor</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
 
-        .upload-container {
-            border: 2px dashed #ccc;
-            padding: 20px;
-            text-align: center;
-            margin: 20px;
-        }
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-87F7P26TQY"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
 
-        #result {
-            margin-top: 20px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            display: none;
-            overflow-x: auto;
-        }
+      gtag('config', 'G-87F7P26TQY');
+    </script>
 
-        .radio-group {
-            margin: 15px 0;
-            padding: 10px;
-            text-align: center;
-        }
-
-        .radio-group label {
-            margin: 0 15px;
-            cursor: pointer;
-        }
-
-        .radio-group-label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        .error {
-            color: red;
-            display: none;
-            margin: 10px 0;
-        }
-
-        pre {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
-
-        /* Styling for the dropdown */
-        select {
-            padding: 8px 12px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            background-color: white;
-            cursor: pointer;
-            margin: 10px 0;
-            width: 200px;
-        }
-
-        select:hover {
-            border-color: #888;
-        }
-
-        /* Style for the submit button */
-        button[type="submit"] {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-top: 20px;
-        }
-
-        button[type="submit"]:hover {
-            background-color: #45a049;
-        }
-
-        /* File input styling */
-        input[type="file"] {
-            padding: 10px;
-            margin-bottom: 20px;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DFS Combinatorial Analysis</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>CSV File Processor</h1>
-    <div class="upload-container">
-        <form id="upload-form">
-            <input type="file" id="file-input" accept=".csv">
+    {% include 'components/header.html' %}
 
-            <div class="radio-group">
-                <span class="radio-group-label">Analysis Option:</span>
-                <label>
-                    <input type="radio" name="option" value="1" checked> 1
-                </label>
-                <label>
-                    <input type="radio" name="option" value="2"> 2
-                </label>
-                <label>
-                    <input type="radio" name="option" value="3"> 3
-                </label>
-            </div>
-
-            <div class="radio-group">
-                <span class="radio-group-label">Sport:</span>
-                <label>
-                    <input type="radio" name="sport" value="PGA" checked> PGA
-                </label>
-                <label>
-                    <input type="radio" name="sport" value="NFL"> NFL
-                </label>
-                <label>
-                    <input type="radio" name="sport" value="NBA"> NBA
-                </label>
-            </div>
-
-            <div class="radio-group">
-                <span class="radio-group-label">Game Type:</span>
-                <label>
-                    <input type="radio" name="gametype" value="Classic" checked> Classic
-                </label>
-                <label>
-                    <input type="radio" name="gametype" value="Showdown"> Showdown
-                </label>
-            </div>
-
-            <div class="radio-group">
-                <span class="radio-group-label">Number of Results:</span>
-                <select name="numResults" id="numResults">
-                    <option value="50">50</option>
-                    <option value="100">100</option>
-                    <option value="150">150</option>
-                    <option value="200">200</option>
-                    <option value="250">250</option>
-                </select>
-            </div>
-
-            <button type="submit">Process File</button>
-        </form>
-    </div>
-    <div id="error" class="error"></div>
-    <div id="result">
-        <h2>Results:</h2>
-        <pre id="json-result"></pre>
+    <div class="construction-banner">
+        <div class="banner-content">
+            <i class="fas fa-hard-hat"></i>
+            <strong>Note:</strong> This website is still under construction.
+            While it works for any DraftKings or custom file upload, there may be occasional bugs.
+            The only contests you can view 150-max DFS player (or tout) lineups are currently the most recent $25 Flagship PGA Contest, the most recent $15 Flagship NBA contest, and the Super Bowl Millymaker
+            (no CPT functionality yet).
+            More to come later.
+            <em>Please report any issues, tout results, or feature requests you would like to see to jdeegs99@gmail.com</em>.
+        </div>
     </div>
 
-    <script>
-        document.getElementById('upload-form').onsubmit = async function(e) {
-            e.preventDefault();
+    <main>
+        <div class="container">
+            <div class="content-wrapper">
+                <div class="card main-content">
+                    <h2>Analysis Tool</h2>
+                    <div class="tool-container">
+                        <form id="upload-form">
+                            <div class="form-group source-selection">
+                                <h3>Data Source</h3>
+                                <div class="toggle-container">
+                                    <div class="toggle-option" data-value="upload">
+                                        <i class="fas fa-upload"></i>
+                                        <span>Upload File</span>
+                                    </div>
+                                    <div class="toggle-option" data-value="directory">
+                                        <i class="fas fa-folder-open"></i>
+                                        <span>Select DFS Player Lineups</span>
+                                    </div>
+                                    <input type="hidden" name="source_type" id="source_type" value="upload">
+                                </div>
 
-            const formData = new FormData();
-            const fileInput = document.getElementById('file-input');
-            const errorDiv = document.getElementById('error');
-            const resultDiv = document.getElementById('result');
-            const selectedOption = document.querySelector('input[name="option"]:checked').value;
-            const selectedSport = document.querySelector('input[name="sport"]:checked').value;
-            const selectedGameType = document.querySelector('input[name="gametype"]:checked').value;
-            const selectedNumResults = document.getElementById('numResults').value;
+                                <div id="upload-section" class="file-input-section active">
+                                    <label for="file-input" class="file-drop-area">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <span class="drop-text">Drag & drop file or click to browse</span>
+                                        <input type="file" id="file-input" name="file" accept=".csv" class="file-input">
+                                    </label>
+                                    <div class="file-info"></div>
+                                </div>
 
-            formData.append('file', fileInput.files[0]);
-            formData.append('option', selectedOption);
-            formData.append('sport', selectedSport);
-            formData.append('gametype', selectedGameType);
-            formData.append('numResults', selectedNumResults);
+                                <div id="directory-section" class="file-input-section">
+                                    <div class="tournament-selection">
+                                        <h4>Tournament</h4>
+                                        <div class="toggle-container small">
+                                            <!--
+                                            <div class="toggle-option small active" data-value="genesis-invitational">
+                                                <span>Genesis Invitational</span>
+                                            </div>
 
-            try {
-                const response = await fetch('/process', {
-                    method: 'POST',
-                    body: formData
-                });
+                                            <div class="toggle-option small" data-value="mexico-open">
+                                                <span>Mexico Open</span>
+                                            </div>
+                                            -->
+                                            <div class="toggle-option small" data-value="cognizant-classic">
+                                                <span>Cognizant Classic</span>
+                                            </div>
 
-                const data = await response.json();
+                                            <div class="toggle-option small" data-value="nba">
+                                                <span>NBA</span>
+                                            </div>
+                                            <div class="toggle-option small" data-value="nfl">
+                                                <span>NFL</span>
+                                            </div>
+                                            <input type="hidden" name="tournament" id="tournament" value="mexico-open">
+                                        </div>
+                                    </div>
+                                    <div class="select-wrapper">
+                                        <select id="directory-files" name="selected_file">
+                                            <option value="">Select DFS Player (or tout)</option>
+                                        </select>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                </div>
+                            </div>
 
-                if (response.ok) {
-                    document.getElementById('json-result').textContent =
-                        JSON.stringify(data.result, null, 2);
-                    errorDiv.style.display = 'none';
-                    resultDiv.style.display = 'block';
-                } else {
-                    errorDiv.style.display = 'block';
-                    errorDiv.textContent = data.error;
-                    resultDiv.style.display = 'none';
-                }
-            } catch (error) {
-                errorDiv.style.display = 'block';
-                errorDiv.textContent = 'An error occurred while processing the file.';
-                resultDiv.style.display = 'none';
-            }
-        };
-    </script>
+                            <div class="form-group">
+                                <h3>Analysis Options</h3>
+                                <div class="options-grid">
+                                    <div class="option-block">
+                                        <h4>Combination Length</h4>
+                                        <div class="button-group">
+                                            <label class="option-button active">
+                                                <input type="radio" name="option" value="1" checked>
+                                                <span>1</span>
+                                            </label>
+                                            <label class="option-button">
+                                                <input type="radio" name="option" value="2">
+                                                <span>2</span>
+                                            </label>
+                                            <label class="option-button">
+                                                <input type="radio" name="option" value="3">
+                                                <span>3</span>
+                                            </label>
+                                            <label class="option-button">
+                                                <input type="radio" name="option" value="4">
+                                                <span>4</span>
+                                            </label>
+                                            <label class="option-button">
+                                                <input type="radio" name="option" value="5">
+                                                <span>5</span>
+                                            </label>
+                                            <label class="option-button">
+                                                <input type="radio" name="option" value="6">
+                                                <span>6</span>
+                                            </label>
+                                            <label class="option-button">
+                                                <input type="radio" name="option" value="7">
+                                                <span>7</span>
+                                            </label>
+                                            <label class="option-button">
+                                                <input type="radio" name="option" value="8">
+                                                <span>8</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="option-block">
+                                        <h4>Sport</h4>
+                                        <div class="button-group">
+                                            <label class="option-button active">
+                                                <input type="radio" name="sport" value="PGA" checked>
+                                                <span>PGA</span>
+                                            </label>
+                                            <label class="option-button">
+                                                <input type="radio" name="sport" value="NBA">
+                                                <span>NBA</span>
+                                            </label>
+                                            <label class="option-button">
+                                                <input type="radio" name="sport" value="NFL">
+                                                <span>NFL</span>
+                                            </label>
+
+                                        </div>
+                                    </div>
+
+                                    <div class="option-block">
+                                        <h4>Game Type</h4>
+                                        <div class="button-group">
+                                            <label class="option-button active">
+                                                <input type="radio" name="mode" value="Classic" checked>
+                                                <span>Classic</span>
+                                            </label>
+                                            <label class="option-button">
+                                                <input type="radio" name="mode" value="Showdown">
+                                                <span>Showdown</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="option-block">
+                                        <h4>Results Count</h4>
+                                        <div class="select-wrapper">
+                                            <select name="numResults" id="numResults">
+                                                <option value="50">50</option>
+                                                <option value="100">100</option>
+                                                <option value="150">150</option>
+                                                <option value="200">200</option>
+                                                <option value="250">250</option>
+                                            </select>
+                                            <i class="fas fa-chevron-down"></i>
+                                        </div>
+                                    </div>
+
+                                    <div class="option-block">
+                                        <h4>Show Percentages</h4>
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" id="percents-toggle" class="toggle-input">
+                                            <label for="percents-toggle" class="toggle-label"></label>
+                                            <input type="hidden" name="percents" id="percents" value="No">
+                                        </div>
+                                    </div>
+
+                                    <div class="option-block">
+                                        <h4>DraftKings File</h4>
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" id="dk-file-toggle" class="toggle-input">
+                                            <label for="dk-file-toggle" class="toggle-label"></label>
+                                            <input type="hidden" name="is_dk_file" id="is_dk_file" value="No">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="primary-button">
+                                    <i class="fas fa-chart-pie"></i>
+                                    <span>Analyze Data</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="error" class="error-message"></div>
+
+                    <div id="result" class="results-section">
+                        <div class="results-header">
+                            <h2>Analysis Results</h2>
+                            <button id="download-results" class="secondary-button">
+                                <i class="fas fa-download"></i>
+                                <span>Download</span>
+                            </button>
+                        </div>
+                        <div id="table-container" class="results-table-wrapper"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card instructions-box">
+                <h3>Instructions</h3>
+                <ol>
+                    <li>Choose your data source:
+                        <ul>
+                            <li>Upload your own CSV file</li>
+                            <li>Or select a file from available lineup sets of 150-max DFS players <i>(currently only availble for select $5 Flagship PGA contests, most recent NBA Flagship contest, and Super Bowl Milly Maker)</i></li>
+                            <li><strong>Developer's Note:</strong> if dropdown menu not working, just toggle options back and forth and should be good. Working on fix.</li>
+                        </ul>
+                    </li>
+                    <li>Choose combination length (1-8):
+                        <ul>
+                            <li>1: Single players</li>
+                            <li>2: Pairs of players</li>
+                            <li>3: Trios of players</li>
+                            <li><strong>Note: </strong>Works all the way up to the size of a lineup for that sport/mode.</li>
+
+                        </ul>
+                    </li>
+                    <li>Select your sport and game type</li>
+                    <li>Choose how many results to display</li>
+                    <li>Select whether to show raw counts or percentages</li>
+                    <li>Indicate if this is a DraftKings file:
+                        <ul>
+                            <li>Yes - if you downloaded directly from DraftKings</li>
+                            <li>No - if you're using a custom CSV format</li>
+                        </ul>
+                    </li>
+                </ol>
+                <p><strong>File Notes:</strong> For DraftKings files, ensure you're using the provided lineups file (DraftKings Home Page -> Lineups -> Edit Entries -> Download). For custom files, ensure your CSV columns match the required format for the selected sport and game type.</p>
+                <p>If uploading a custom file, the first N columns should be the length of a lineup, similar to how most sites will export lineups.</p>
+                <p>For example: if uploading Classic NBA, then the first 8 columns should be: <p>PG  SG  SF  PF  C  G  F  UTIL</p>
+                <p>Similarly, if uploading PGA, then the first 6 columns should be: <p>G  G  G  G  G  G</p></p>
+                <p><strong>Please note: file names, column names, and length of files are irrelavant. Any columns afterwards (salary, FPTS, ownership, etc.) will be discarded as they are not necessary for this tool.</strong></p>
+             </div>
+        </div>
+    </main>
+
+    {% include 'components/footer.html' %}
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
